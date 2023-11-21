@@ -156,7 +156,7 @@ class GenerateGuideView(generics.RetrieveAPIView):
 
     @staticmethod
     def generate_text_with_gpt3(project, root_asset, repo_content, section_title, user):
-        api_key = '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'  # clave
+        api_key = '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'  # clave
         prompt = f"Genera directamente el contenido util para una sección titulada '{section_title}' basado en la siguiente información del proyecto Django Rest Framework:\n\n{repo_content}\n"
 
         headers = {
