@@ -4,7 +4,7 @@ from rest_framework import generics, permissions,status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404 
-from codeia.models import Asset, Project
+from codeia.models import Asset, Project, User
 from django.forms.models import model_to_dict
 from rest_framework.pagination import PageNumberPagination
 from codeia.permissions import IsAuthenticatedUser
@@ -28,6 +28,25 @@ class ListAssetView(generics.ListAPIView):
     serializer_class = ListAssetSerializer
     permission_classes = [permissions.AllowAny] 
     queryset = Asset.objects.filter(depth=0).order_by('id')
+
+""" 
+Listar Asset por version y projecto
+"""
+class ListAssetByVersionView(generics.ListAPIView):
+    serializer_class = ListAssetSerializer
+    authentication_classes = [JWTAuthentication]  # Autenticacion
+    permission_classes = [permissions.IsAuthenticated]  # Permisos
+    queryset = Asset.objects.all()
+
+    def get_queryset(self):
+        version = self.kwargs['version']
+        title = self.kwargs['title']
+        user_repo = self.kwargs['user_repo']
+        project = get_object_or_404(Project, title=title, user_repo=user_repo)
+        user = get_object_or_404(User, pk=self.request.user.id)
+        if not project in user.projects.all():
+            raise PermissionDenied({'status': 'Not found'})
+        return Asset.objects.filter(version=version, project_id=project.id, depth=0).order_by('id')
 
 """  
 Crear asset

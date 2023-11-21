@@ -14,6 +14,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["id"] = self.user.id
         userprofile = get_object_or_404(User, email=self.user)
         data["role"] = userprofile.role
+        data["name"] = userprofile.name + " " + userprofile.surname
+        data["repo_login"] = userprofile.repo_login
         return data
     
 class RegisterSerializer(serializers.ModelSerializer):
