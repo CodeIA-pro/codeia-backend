@@ -51,8 +51,9 @@ class RetrieveProjectView(generics.RetrieveAPIView):
     queryset = Project.objects.all()
 
     def get_object(self):
-        id = self.kwargs['pk']
-        project = get_object_or_404(Project, pk=id)
+        project = self.kwargs['project']
+        owner = self.kwargs['owner'] 
+        project = get_object_or_404(Project, user_repo=owner, title=project)
         user = get_object_or_404(User, id=self.request.user.id)
         if not project in user.projects.all():
             raise PermissionDenied("Project not found")
@@ -165,7 +166,7 @@ class GenerateGuideView(generics.RetrieveAPIView):
         }
 
         data = {
-            'model': 'gpt-3.5-turbo',
+            'model': 'gpt-4',
             'messages': [
                 {
                     'role': 'system',
