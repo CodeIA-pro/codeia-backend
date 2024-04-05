@@ -28,6 +28,9 @@ Temporary Items
 # Byte-compiled  optimized  DLL files
 __pycache__
 .py[cod]
+.venv
+Scripts
+pyvenv.cfg
 
 # C extensions
 .so
@@ -87,3 +90,6 @@ local_settings.py
 
 .env
 db.sqlite3
+
+# Editors
+.idea
