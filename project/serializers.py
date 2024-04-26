@@ -14,7 +14,7 @@ class ProjectAssetSerializer(serializers.ModelSerializer):
         return ProjectAssetSerializer(subsection_asset, many=True).data
 
 class ListProjectSerializer(serializers.ModelSerializer):
-    #assets = ProjectAssetSerializer(many=False)
+
     class Meta:
         model = Project
         fields = ['id', 'title', 'branch', 'url_repo', 'user_repo', 'latest_build', 
@@ -47,6 +47,9 @@ class ChangeProjectSerializer(serializers.ModelSerializer):
 
 class GenerateConnectionSerializer(serializers.Serializer):
     status = serializers.CharField()
+
+class VersionSerializer(serializers.Serializer):
+    status = serializers.BooleanField()
 
 # Error Serializer
 class ErrorSerializer(serializers.Serializer):

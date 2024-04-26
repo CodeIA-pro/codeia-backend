@@ -15,6 +15,7 @@ from .serializers import (
     GetProjectSerializer,
     ChangeProjectSerializer,
     GenerateConnectionSerializer,
+    VersionSerializer,
     ErrorSerializer,
 )
 from datetime import datetime
@@ -118,6 +119,7 @@ class GenerateGuideView(generics.RetrieveAPIView):
         
         project.assets.add(root_asset)
         project.is_Loading = True
+        project.last_short_sha = sha
         project.save()
         secciones = [
             "Introducción",
@@ -127,7 +129,7 @@ class GenerateGuideView(generics.RetrieveAPIView):
             "Recomendaciones de Seguridad"
         ]
         # Crear activos de nivel 1
-        print('Entrando a modelo')
+        # Entrando a modelo
         for section in secciones:
             guide_content = self.generate_text_with_gpt3(project, root_asset, repo_content, section, project.title)
             self.create_subsection(root_asset, section, guide_content)
@@ -182,7 +184,7 @@ class GenerateGuideView(generics.RetrieveAPIView):
         response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=data)
         print('Entrando a modelo')
         if response.status_code == 200:
-            print(response.json()['choices'][0]['message']['content'])
+            #print(response.json()['choices'][0]['message']['content'])
             return response.json()['choices'][0]['message']['content']
         else:
             print('Error')
@@ -233,6 +235,25 @@ class GenerateConnectionGitHubView(generics.RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         # Aquí se invoca get_object y se maneja la respuesta.
         return self.get_object()    
+    
+"""
+Estado de la conexión con github
+"""
+class ConnectionGitHubStatusView(generics.RetrieveAPIView):
+    serializer_class = GenerateConnectionSerializer
+    authentication_classes = [JWTAuthentication]  # Autenticacion
+    permission_classes = [permissions.IsAuthenticated]  # Permisos
+
+    def get_object(self):
+        user = get_object_or_404(User, id=self.request.user.id)
+        if user.repo_login:
+            return Response({'status': 'success'})
+        else:
+            return Response({'status': 'fail'})
+
+    def retrieve(self, request, *args, **kwargs):
+        # Aquí se invoca get_object y se maneja la respuesta.
+        return self.get_object()
 
 """
 Generar Conexion a un proyecto (deprecated)
@@ -409,7 +430,6 @@ class RetrieveInformationGitHubRepoView(generics.RetrieveAPIView):
         project.is_Loading = True
         if response.status_code == 200:
             tree = response.json()['tree']
-
             # Buscar settings.py en cualquier parte del árbol   
             for item in tree:
                 if item['type'] == 'tree':
@@ -417,7 +437,7 @@ class RetrieveInformationGitHubRepoView(generics.RetrieveAPIView):
                     subdir_response = requests.get(subdir_url, headers=headers)
                     if subdir_response.status_code == 200:
                         subdir_tree = subdir_response.json()['tree']
-                        
+
                         # Buscar en subdirectorio
                         for subitem in subdir_tree:
                             if subitem['path'].endswith('settings.py'):
@@ -453,7 +473,7 @@ class RetrieveInformationGitHubRepoView(generics.RetrieveAPIView):
                     return Response({'status': 'Error finding PROJECT_APPS in repo'})
 
                 # Construir rutas relativas a partir de PROJECT_APPS
-                print(project_apps)
+                # print(project_apps)
                 urls_content = ""
                 for app in project_apps:
                     url = f"https://api.github.com/repos/{project.user_repo}/{project.title}/contents/{app}/urls.py?ref={project.branch}"
@@ -461,7 +481,6 @@ class RetrieveInformationGitHubRepoView(generics.RetrieveAPIView):
                     if content.status_code == 200:
                         # content
                         urls_content += base64.b64decode(content.json()['content']).decode() + '\n'
-
 
                 # Guardar información obtenida   
                 project.information = settings_content
@@ -484,21 +503,53 @@ class RetrieveInformationGitHubRepoView(generics.RetrieveAPIView):
         return self.get_object()
 
 """  
+Verificar si se tiene el ultimo commit
+"""
+class RetrieveSHAGitHubRepoView(generics.RetrieveAPIView):
+    serializer_class = VersionSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        id = self.kwargs['pk']
+        project = get_object_or_404(Project, pk=id)
+        user = get_object_or_404(User, id=self.request.user.id)
+        headers = {'Authorization': f'token {user.token_repo}'}
+        # Obtener el árbol de archivos del repo
+        url = f"https://api.github.com/repos/{project.user_repo}/{project.title}/git/trees/{project.branch}"
+        response = requests.get(url, headers=headers)
+        project.is_Loading = True
+        if response.status_code == 200:
+            sha = response.json()['sha']
+            if sha[:8] == project.last_short_sha:
+                return Response({'status': True})
+            else:
+                return Response({'status': False})
+        else:
+            return Response({'status': False})
+        
+    def retrieve(self, request, *args, **kwargs):
+        return self.get_object()
+
+"""  
 Crear proyectos
 """
 class CreateProjectView(generics.CreateAPIView):
     serializer_class = ProjectSerializer
-    authentication_classes = [JWTAuthentication]  # Autenticacion
-    permission_classes = [permissions.IsAuthenticated]  # Permisos
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        user = get_object_or_404(User, id=self.request.user.id)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(User, id=request.user.id)
         data = dict(serializer.validated_data)
         data['latest_build'] = None
         new_asset = Project.objects.create(**data)
         user.projects.add(new_asset)
         user.save()
-        return Response({'message': 'Product created successfully'}, status=status.HTTP_201_CREATED)
+        serialized_data = ProjectSerializer(instance=new_asset).data
+        return Response(serialized_data, status=status.HTTP_201_CREATED)
 
 """
 Update proyectos

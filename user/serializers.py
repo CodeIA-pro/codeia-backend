@@ -3,7 +3,9 @@ from django.contrib.auth import (
 )
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
+from email_system.send_email import generate_code, email_verify
 from codeia.models import User
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -13,25 +15,53 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["user"] = str(self.user)
         data["id"] = self.user.id
         userprofile = get_object_or_404(User, email=self.user)
+        if userprofile.is_unverified:
+            return {'status': True}
+        if userprofile.two_factor:
+            code = generate_code()
+            userprofile.verification_code = code
+            userprofile.save()
+            email_verify(userprofile.email, userprofile.name + " " + userprofile.surname, code)
+            return {'two_factor': True}
         data["role"] = userprofile.role
         data["name"] = userprofile.name + " " + userprofile.surname
         data["repo_login"] = userprofile.repo_login
         return data
     
+class MyTokenTwoFASerializer(serializers.Serializer):
+    code = serializers.IntegerField()
+
+    def validate(self, attrs):
+        code = attrs.get('code')
+        user = get_object_or_404(User, verification_code=code)
+        refresh = RefreshToken.for_user(user)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'id': user.id,
+            'user': user.email,
+            'name': f"{user.name} {user.surname}",
+            'role': user.role,
+            'repo_login': user.repo_login,
+        }
+    
 class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ["id","email", "name", "surname", "nationality", "date_of_birth", "role", "password",]
+        fields = ["id","email", "name", "surname", "date_of_birth", "role", "password",]
         read_only_fields = ["id","role",]
 
+
+class CheckSerializer(serializers.Serializer):
+    code = serializers.IntegerField()
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = get_user_model()
-        fields = ["id", "email", "name", "surname", "nationality", "date_of_birth", "role", "created_at", "password"]
+        fields = ["id", "email", "name", "surname", "date_of_birth", "role", "created_at", "password"]
         read_only_fields = ["id", "created_at", "role",]
 
     def __init__(self, *args, **kwargs):
@@ -55,11 +85,11 @@ class UserSerializer(serializers.ModelSerializer):
 class UserSerializerAdmin(serializers.ModelSerializer):
      class Meta:
         model = get_user_model()
-        fields = ["id", "email", "name", "surname", "nationality", "date_of_birth", "role", "created_at",]
+        fields = ["id", "email", "name", "surname", "date_of_birth", "role", "created_at",]
         read_only_fields = ["id", "created_at",]
 
 class UserSerializerAdminUpdate(serializers.ModelSerializer):
      class Meta:
         model = get_user_model()
-        fields = ["id", "email", "name", "surname", "nationality", "date_of_birth", "role", "created_at",]
+        fields = ["id", "email", "name", "surname", "date_of_birth", "role", "created_at",]
         read_only_fields = ["id", "created_at","email"]

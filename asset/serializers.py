@@ -8,7 +8,7 @@ class ListAssetSerializer(serializers.ModelSerializer):
         fields = ['id', 'version', 'titulo', 'description', 'more_description', 'depth', 'url', 
                   'is_father', 'father_id', 'subsection']
         read_only_fields = ['id', 'created_at']
-
+        
     def get_subsection(self, obj):
         subsection_asset = obj.subsection.all().order_by('id')
         return ListAssetSerializer(subsection_asset, many=True).data

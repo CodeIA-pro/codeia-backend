@@ -24,4 +24,6 @@ urlpatterns = [
     path("faq/", include("faq.urls"), name="faq"),
     path("typecomment/", include("typecomment.urls"), name="typecomment"),
     path("comment/", include("comment.urls"), name="comment"),
+    path("repository/", include("repository.urls"), name="repository"),
+    path("forgotten/", include("forgotten.urls"), name="forgotten"),
 ]
