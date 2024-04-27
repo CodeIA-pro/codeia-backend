@@ -29,4 +29,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           source env/bin/activate
-          zappa update prod
+          zappa deploy prod
