@@ -14,7 +14,7 @@ urlpatterns = [
         "api/schema/", SpectacularAPIView.as_view(), name="api-schema"
     ),  # genera el esquema de la API
     path(
-        "prod",
+        "",
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
