@@ -1,9 +1,9 @@
 {
-    "prod": {
+    "dev": {
         "aws_region": "us-east-2",
         "django_settings": "app.settings",
         "profile_name": "default",
-        "project_name": "codeia-api-v1",
+        "project_name": "codeia-api-v2",
         "runtime": "python3.9",
         "s3_bucket": "zappa-backend-codeia-prod"
     }
