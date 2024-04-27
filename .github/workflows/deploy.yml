@@ -1,0 +1,32 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    name: Deploy to AWS Lambda prod
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python 3.9
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Create virtualenv
+        run: python -m venv venv
+
+      - name: Upgrade pip
+        run: source venv/bin/activate && python -m pip install --upgrade pip
+          
+      - name: Install dependencies
+        run: source venv/bin/activate && pip install -r requirements.txt
+
+      - name: Configure AWS CLI
+        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set region us-east-2
