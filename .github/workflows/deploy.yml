@@ -29,9 +29,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           source env/bin/activate
-          stack_exists=$(zappa status prod | grep -c 'StackStatus')
-          if [ $stack_exists -eq 0 ]; then
-            zappa deploy prod
-          else
-            zappa update prod
-          fi
+          zappa deploy prod
