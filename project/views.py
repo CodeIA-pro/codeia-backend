@@ -451,49 +451,83 @@ class RetrieveInformationGitHubRepoView(generics.RetrieveAPIView):
             
             # Uso de settings_url
             if settings_url is not None:
-                # Obtener contenido de settings.py
+            # Obtener contenido de settings.py
                 settings_response = requests.get(settings_url, headers=headers)
+                # Verificar si se obtuvo el contenido
+                if settings_response.status_code == 200:
+                    settings_content = base64.b64decode(settings_response.json()['content']).decode()
+                    information = settings_content + "\n"  # Add settings.py to the information
+
+                    # Extract PROJECT_APPS list from settings.py
+                    match = re.search(r"PROJECT_APPS\s*=\s*\[([\s\w,'\"]+?)\]", settings_content, re.DOTALL)
+                    # Verificar si se encontró PROJECT_APPS
+                    if match:
+                        project_apps_str = match.group(1)
+                        project_apps = [app.strip().strip('"').strip("'") for app in project_apps_str.split(',') if app.strip()]
+                    else:
+                        project.is_Loading = False
+                        project.message_failed = 'Error finding PROJECT_APPS in repo'
+                        project.save()
+                        return Response({'status': 'Error finding PROJECT_APPS in repo'})
+
+                    # Initialize variables for urls.py, serializers.py, views.py, models.py
+                    url_info = ""
+                    serializer_info = ""
+                    view_info = ""
+                    models_found = True
+
+                    # Search in all repository files
+                    for app in project_apps:
+                        # Get urls.py
+                        url = f"https://api.github.com/repos/{project.user_repo}/{project.title}/contents/{app}/urls.py?ref={project.branch}"
+                        urls_response = requests.get(url, headers=headers)
+                        if urls_response.status_code == 200:
+                            url_info += f"This section is from {app}\n"
+                            url_info += base64.b64decode(urls_response.json()['content']).decode() + "\n\n"
+                        else:
+                            print('No se encontro urls.py' + app)
+
+                        # Get serializers.py
+                        url = f"https://api.github.com/repos/{project.user_repo}/{project.title}/contents/{app}/serializers.py?ref={project.branch}"
+                        serializers_response = requests.get(url, headers=headers)
+                        if serializers_response.status_code == 200:
+                            serializer_info += f"This section is from {app}\n"
+                            serializer_info += base64.b64decode(serializers_response.json()['content']).decode() + "\n\n"
+                        else:
+                            print('No se encontro serializers.py ' + app)
+
+                        # Get views.py
+                        url = f"https://api.github.com/repos/{project.user_repo}/{project.title}/contents/{app}/views.py?ref={project.branch}"
+                        views_response = requests.get(url, headers=headers)
+                        if views_response.status_code == 200:
+                            view_info += f"This section is from {app}\n"
+                            view_info += base64.b64decode(views_response.json()['content']).decode() + "\n\n"
+                        else:
+                            print('No se encontro views.py ' + app)
+
+                        # Get models.py
+                        if models_found:
+                            url = f"https://api.github.com/repos/{project.user_repo}/{project.title}/contents/{app}/models.py?ref={project.branch}"
+                            models_response = requests.get(url, headers=headers)
+                            if models_response.status_code == 200:
+                                information += base64.b64decode(models_response.json()['content']).decode()
+                                models_found = False
+
+                    project.information = information.strip()
+                    project.url_info = url_info.strip()
+                    project.serializer_info = serializer_info.strip()
+                    project.view_info = view_info.strip()
+                    project.is_Loading = False
+                    project.save()
+                    return Response({'status': 'Tests are being done :)'})
+                    #return Response({'status': 'success'})
+
             else:
                 project.is_Loading = False
                 project.message_failed = 'Error finding root file "settings.py" in repo'
                 project.save()
                 return Response({'status': 'Error finding root file "settings.py" in repo'})
-            
-            if settings_response.status_code == 200:
-                settings_content = base64.b64decode(settings_response.json()['content']).decode()
-                match = re.search(r"PROJECT_APPS\s*=\s*\[([^\]]*)\]", settings_content, re.DOTALL)
-                project_apps = []
-                if match:
-                    project_apps_str = match.group(1)
-                    project_apps = [app.strip().strip('"').strip("'") for app in project_apps_str.split(',') if app.strip()]
-                else:
-                    project.is_Loading = False
-                    project.message_failed = 'Error finding PROJECT_APPS in repo'
-                    project.save()
-                    return Response({'status': 'Error finding PROJECT_APPS in repo'})
 
-                # Construir rutas relativas a partir de PROJECT_APPS
-                # print(project_apps)
-                urls_content = ""
-                for app in project_apps:
-                    url = f"https://api.github.com/repos/{project.user_repo}/{project.title}/contents/{app}/urls.py?ref={project.branch}"
-                    content = requests.get(url, headers=headers)
-                    if content.status_code == 200:
-                        # content
-                        urls_content += base64.b64decode(content.json()['content']).decode() + '\n'
-
-                # Guardar información obtenida   
-                project.information = settings_content
-                project.urls = urls_content
-                project.message_failed = ''
-                project.save()
-
-                return Response({'status': 'success'})
-
-            else:
-                project.is_Loading = False
-                project.save()
-                return Response({'status': 'Error finding root file "settings.py" in repo'})
         else:
             project.is_Loading = False
             project.save()
