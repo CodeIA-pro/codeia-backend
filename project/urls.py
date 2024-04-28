@@ -19,6 +19,7 @@ urlpatterns = [
     path('get/github/branches/<str:repo>/owner/<str:owner>/', views.RetrieveGitHubRepoBranches.as_view(), name='get github branches'),
     path('get/github/languages/<str:repo>/owner/<str:owner>/', views.RetrieveGitHubRepoLanguages.as_view(), name='get github languages'),
     path('generate-connetion/<int:pk>/', views.GenerateConnectionView.as_view(), name='generate connection'), # deprecated
-    path('gerenate-guide/<int:pk>/', views.GenerateGuideView.as_view(), name='generate gui'),
+    path('guide-reference-completion/', views.GenerateAssetInformationView.as_view(), name='generate guia completion'),
+    path('guide-reference/', views.GenerateAssetSubsectionView.as_view(), name='generate guia'),
     path('read-repo/<int:pk>/', views.RetrieveInformationGitHubRepoView.as_view(), name='read repo'),
 ]

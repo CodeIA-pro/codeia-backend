@@ -56,6 +56,7 @@ class Asset(models.Model):
     privacy = models.CharField(max_length=100, blank=True, default='private')
     to_failed = models.BooleanField(default=False, blank=True)
     message_failed = models.TextField(blank=True, default='')
+    theme = models.CharField(max_length=100, blank=True, default='')
     is_father = models.BooleanField(default=False, blank=True)
     father_id = models.IntegerField(blank=False)
     project_id = models.IntegerField(blank=True)

@@ -6,6 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404 
 from codeia.models import Project, User, Asset
+from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from codeia.permissions import IsAuthenticatedUser
 from asset.serializers import AssetSerializer
@@ -15,6 +16,8 @@ from .serializers import (
     GetProjectSerializer,
     ChangeProjectSerializer,
     GenerateConnectionSerializer,
+    GuiaSerializers,
+    GuiaCompletitionSerializers,
     VersionSerializer,
     InfoProjectSerializer,
     ErrorSerializer,
@@ -61,7 +64,9 @@ class RetrieveProjectView(generics.RetrieveAPIView):
             raise PermissionDenied("Project not found")
         return project
 
-
+"""
+Detalles de un proyecto
+"""
 class RetrieveProjectInfoView(generics.RetrieveAPIView):
     serializer_class = InfoProjectSerializer
     authentication_classes = [JWTAuthentication]  # Autenticacion
@@ -76,7 +81,7 @@ class RetrieveProjectInfoView(generics.RetrieveAPIView):
             raise PermissionDenied("Project not found")
         return project
 """
-Generar Guia de referencia para un proyecto
+Generar Guia de referencia para un proyecto (deprecated)
 """
 class GenerateGuideView(generics.RetrieveAPIView):
     serializer_class = GenerateConnectionSerializer
@@ -371,6 +376,177 @@ class RetrieveGitHubUserRepos(generics.RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         return self.get_object()
+
+"""
+Generar asset para proyectos (pre-generación oficial)
+"""
+class GenerateAssetSubsectionView(generics.CreateAPIView):
+    serializer_class = GuiaSerializers
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    @staticmethod
+    def get_next_version(self, project_id):
+        last_asset = Asset.objects.filter(depth=0, project_id=project_id).last()
+        if not last_asset:
+            return '1.0.0'
+        
+        major, minor, patch = map(int, last_asset.version.split('.'))
+        if patch < 10:
+            patch += 1
+        else:
+            patch = 0
+            major += 1
+        
+        return f"{major}.{minor}.{patch}"
+    
+    def post(self, request):
+        serializer = GuiaSerializers(data=request.data)
+        if serializer.is_valid():
+            project_id = serializer.validated_data['project_id']
+            theme = serializer.validated_data['theme']
+            section = serializer.validated_data['sections']
+            language = serializer.validated_data['lang']
+            token = serializer.validated_data['token']
+            sections = [section.strip() for section in section.split(",")]
+            user = get_object_or_404(User, id=self.request.user.id)
+            project = get_object_or_404(Project, pk=project_id)
+            if not project in user.projects.all():
+                raise PermissionDenied("Project not found")
+            # get repo content
+            headers = {'Authorization': f'token {user.token_repo}'}
+            response_github =requests.get( f"https://api.github.com/repos/{project.user_repo}/{project.title}/commits/{project.branch}", headers=headers)
+            if response_github.status_code == 200:
+                data = response_github.json()
+                sha = data['sha'][:8]
+                html_url = data['html_url']
+            else:
+                project.is_Loading = False
+                project.message_failed = 'Error fetching repo tree'
+                project.save()
+                return Response({'status': 'Error fetching repo tree'})
+            next_version = self.get_next_version(self, project_id)
+
+            #create root asset
+            root_asset = Asset.objects.create(
+                version=next_version, 
+                titulo=project.title, 
+                is_father=True, 
+                theme=theme,
+                lang=language,
+                father_id=None, 
+                is_Loading=True, 
+                project_id=project.id,
+                short_sha=sha,
+                url_commit=html_url)
+
+            # update project
+            project.assets.add(root_asset)
+            project.is_Loading = True
+            project.last_version = next_version
+            project.status = '0/'+ str(len(sections))
+            project.latest_build = datetime.now()
+            project.last_short_sha = sha
+            project.lang = language
+            project.save()
+
+            # update root asset
+            for section in sections:
+                self.create_subsection(root_asset, section)
+
+            asset = get_object_or_404(Asset, id=root_asset.id)
+            assets = []
+            for section in asset.subsection.all():
+                assets.append({
+                    'name': section.titulo,
+                    'asset_id': section.id
+                })
+
+            response = {
+                'projectId': project.id,
+                'asset_parent': asset.id,
+                'sections': assets,
+                'token': token
+            }
+            request = requests.post('https://sa5p1qrcce.execute-api.us-east-2.amazonaws.com/default/function-guia-facade-v1', json=response)
+
+            if request.status_code == 200:
+                return Response({'status': 'success'})
+            else:
+                asset.is_Loading = False
+                asset.save()
+                project.is_Loading = False
+                project.message_failed = 'Error in the generation system, please contact the support team'
+                project.save()
+                return Response({'status': 'Error in the generation system, please contact the support team'})
+        return Response(serializer.errors)
+
+    @staticmethod
+    def create_subsection(parent_asset, title):
+        # Lógica para crear una subsección
+        asset = get_object_or_404(Asset, pk=parent_asset.id)
+        data = {
+            'titulo': title,
+            'description': '',
+            'depth': parent_asset.depth + 1,
+            'father_id': parent_asset.id,
+            'project_id': parent_asset.project_id,
+            'version': parent_asset.version,
+        }
+        new = Asset.objects.create(**data)
+        asset.subsection.add(new)
+        asset.save()
+
+"""
+Actualizar asset para proyectos (generación oficial)
+"""
+class GenerateAssetInformationView(generics.CreateAPIView):
+    serializer_class = GuiaCompletitionSerializers
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    @staticmethod
+    def short(self, entrada):
+        numerador, denominador = map(int, entrada.split('/'))
+        return f"{numerador + 1}/{denominador}"
+
+    def post(self, request):
+        serializer = GuiaCompletitionSerializers(data=request.data)
+        if serializer.is_valid():
+            project_id = serializer.validated_data['projectId']
+            asset_parent = serializer.validated_data['asset_parent']
+            asset_id = serializer.validated_data['asset_id']
+            success = serializer.validated_data['success']
+            content = serializer.validated_data['content']
+            isFinal = serializer.validated_data['isFinal']
+
+            project = get_object_or_404(Project, id=project_id)
+            asset_father = get_object_or_404(Asset, id=asset_parent)
+            asset_child = get_object_or_404(Asset, id=asset_id)
+
+            if not success:
+                project.is_Loading = False
+                project.status = 'failed'
+                project.message_failed = 'Error in the generation system, please contact the support team'
+                project.save(update_fields=['is_Loading'])
+                asset_father.is_Loading = False
+                asset_father.save(update_fields=['is_Loading'])
+
+
+            asset_child.description = content
+            asset_child.save(update_fields=['description'])
+            project.status = self.short(self, project.status)
+            project.save(update_fields=['status'])
+
+            if isFinal:
+                project.is_Loading = False
+                project.status = 'completed'
+                project.save(update_fields=['is_Loading'])
+                asset_father.is_Loading = False
+                asset_father.save(update_fields=['is_Loading'])
+
+            return Response({'status': 'success'})
+        return Response(serializer.errors)
 
 """
 Obtener ramas de un repositorio de github

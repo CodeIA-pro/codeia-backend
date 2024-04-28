@@ -51,6 +51,22 @@ class ChangeProjectSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'title', 'branch', 'url_repo', 'user_repo', 'latest_build', 
                   'last_version']
 
+
+class GuiaSerializers(serializers.Serializer):
+    sections = serializers.CharField()
+    token = serializers.CharField()
+    project_id = serializers.IntegerField()
+    lang = serializers.CharField()
+    theme = serializers.CharField()
+
+class GuiaCompletitionSerializers(serializers.Serializer):
+    projectId = serializers.IntegerField()
+    asset_parent = serializers.IntegerField()
+    asset_id = serializers.IntegerField()
+    content = serializers.CharField()
+    success = serializers.BooleanField()
+    isFinal = serializers.BooleanField()
+
 # Generate Connection Serializer
 
 class GenerateConnectionSerializer(serializers.Serializer):
