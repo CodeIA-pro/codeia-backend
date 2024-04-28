@@ -16,6 +16,7 @@ from .serializers import (
     ChangeProjectSerializer,
     GenerateConnectionSerializer,
     VersionSerializer,
+    InfoProjectSerializer,
     ErrorSerializer,
 )
 from datetime import datetime
@@ -60,6 +61,20 @@ class RetrieveProjectView(generics.RetrieveAPIView):
             raise PermissionDenied("Project not found")
         return project
 
+
+class RetrieveProjectInfoView(generics.RetrieveAPIView):
+    serializer_class = InfoProjectSerializer
+    authentication_classes = [JWTAuthentication]  # Autenticacion
+    permission_classes = [permissions.IsAuthenticated]  # Permisos
+    queryset = Project.objects.all()
+
+    def get_object(self):
+        project = self.kwargs['pk']
+        project = get_object_or_404(Project, id=project)
+        user = get_object_or_404(User, id=self.request.user.id)
+        if not project in user.projects.all():
+            raise PermissionDenied("Project not found")
+        return project
 """
 Generar Guia de referencia para un proyecto
 """

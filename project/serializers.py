@@ -21,6 +21,14 @@ class ListProjectSerializer(serializers.ModelSerializer):
                   'last_version','is_Loading', 'message_failed']
         read_only_fields = ['id']
 
+class InfoProjectSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Project
+        fields = ['id', 'information','serializer_info', 'url_info', 'view_info', 'lang']
+        read_only_fields = ['id']
+
+
 class GetProjectSerializer(serializers.ModelSerializer):
     assets = ProjectAssetSerializer(many=True)
     class Meta:
