@@ -34,7 +34,7 @@ class GetProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = ['id', 'title', 'branch', 'url_repo', 'user_repo', 'latest_build', 
-                  'last_version', 'assets', 'is_Loading', 'message_failed']
+                  'last_version', 'assets', 'is_Loading', 'message_failed', 'status']
         read_only_fields = ['id']
 
 class ProjectSerializer(serializers.ModelSerializer):
