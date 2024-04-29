@@ -22,6 +22,6 @@ urlpatterns = [
     path('guide-reference-completion/', views.GenerateAssetInformationView.as_view(), name='generate guia completion'),
     path('guide-reference/', views.GenerateAssetSubsectionView.as_view(), name='generate guia'),
     path('read-repo/<int:pk>/', views.RetrieveInformationGitHubRepoView.as_view(), name='read repo'),
-    path('restore/,', views.DeleteGuiAssetView.as_view(), name='restore project'),
+    path('restore/', views.DeleteGuiAssetView.as_view(), name='restore project'),
     path('runnig-guide/', views.GuideRunningView.as_view(), name='running guide'),
 ]

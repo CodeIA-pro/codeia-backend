@@ -596,7 +596,7 @@ class DeleteGuiAssetView(generics.CreateAPIView):
             # Actualizar estado del proyecto
             project.is_Loading = False
             project.status = 'failed'
-            project.last_version = self.revert_version(project.last_version)
+            project.last_version = self.revert_version(self,project.last_version)
             project.message_failed = 'Error in the generation system, please contact the support team'
             project.assets.remove(asset_father)
             project.save()
