@@ -60,12 +60,16 @@ class GuiaSerializers(serializers.Serializer):
     theme = serializers.CharField()
 
 class GuiaCompletitionSerializers(serializers.Serializer):
-    projectId = serializers.IntegerField()
+    project_id = serializers.IntegerField()
     asset_parent = serializers.IntegerField()
     asset_id = serializers.IntegerField()
     content = serializers.CharField()
     success = serializers.BooleanField()
     isFinal = serializers.BooleanField()
+
+class ErrorGuiaSerializers(serializers.Serializer):
+    project_id = serializers.IntegerField()
+    asset_parent = serializers.IntegerField()
 
 # Generate Connection Serializer
 

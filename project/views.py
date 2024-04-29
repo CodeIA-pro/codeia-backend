@@ -1,4 +1,3 @@
-import os
 import re
 from rest_framework.response import Response
 from rest_framework import generics, permissions,status
@@ -17,6 +16,7 @@ from .serializers import (
     ChangeProjectSerializer,
     GenerateConnectionSerializer,
     GuiaSerializers,
+    ErrorGuiaSerializers,
     GuiaCompletitionSerializers,
     VersionSerializer,
     InfoProjectSerializer,
@@ -513,7 +513,7 @@ class GenerateAssetInformationView(generics.CreateAPIView):
     def post(self, request):
         serializer = GuiaCompletitionSerializers(data=request.data)
         if serializer.is_valid():
-            project_id = serializer.validated_data['projectId']
+            project_id = serializer.validated_data['project_id']
             asset_parent = serializer.validated_data['asset_parent']
             asset_id = serializer.validated_data['asset_id']
             success = serializer.validated_data['success']
@@ -549,6 +549,59 @@ class GenerateAssetInformationView(generics.CreateAPIView):
                 asset_father.is_Loading = False
                 asset_father.save(update_fields=['is_Loading'])
 
+            return Response({'status': 'success'})
+        return Response(serializer.errors)
+
+
+"""  
+Eliminar asset tras falla en generación
+"""
+class DeleteGuiAssetView(generics.CreateAPIView):
+    serializer_class = ErrorGuiaSerializers
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    @staticmethod
+    def revert_version(self, version):
+        parts = [int(x) for x in version.split('.')]
+        if parts == [1, 0, 0]:
+            return ''
+        parts[-1] -= 1
+        for i in range(len(parts)-1, -1, -1):
+            if parts[i] < 0:
+                if i == 0:
+                    return "Error: versión fuera de rango"
+                parts[i] = 9
+                parts[i-1] -= 1
+        return '.'.join(str(x) for x in parts)
+
+
+    def post(self, request):
+        serializer = ErrorGuiaSerializers(data=request.data)
+        if serializer.is_valid():
+            project_id = serializer.validated_data['project_id']
+            asset_parent = serializer.validated_data['asset_parent']
+
+            user = get_object_or_404(User, id=self.request.user.id)
+            project = get_object_or_404(Project, id=project_id)
+            if not project in user.projects.all():
+                raise PermissionDenied("Project not found")
+            asset_father = get_object_or_404(Asset, id=asset_parent, project_id=project_id)
+
+            # Eliminar todos los activos secundarios
+            for asset in asset_father.subsection.all():
+                asset.delete()
+
+            # Actualizar estado del proyecto
+            project.is_Loading = False
+            project.status = 'failed'
+            project.last_version = self.revert_version(project.last_version)
+            project.message_failed = 'Error in the generation system, please contact the support team'
+            project.assets.remove(asset_father)
+            project.save()
+
+            # Actualizar estado del activo padre
+            asset_father.delete()
             return Response({'status': 'success'})
         return Response(serializer.errors)
 
