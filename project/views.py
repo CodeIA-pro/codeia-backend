@@ -615,7 +615,7 @@ class GuideRunningView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        serializer = ErrorGuiaSerializers(data=request.data)
+        serializer = UpdateRunningGuiaSerializers(data=request.data)
         if serializer.is_valid():
             project_id = serializer.validated_data['project_id']
             guide_running = serializer.validated_data['guide_running']
