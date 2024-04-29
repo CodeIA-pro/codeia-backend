@@ -75,6 +75,7 @@ class Project(models.Model):
     last_version = models.CharField(max_length=100, blank=True)
     template = models.TextField(blank=True, default='default')
     message_failed = models.TextField(blank=True, default='')
+    guide_running = models.BooleanField(default=False, blank=True)
     lang = models.CharField(max_length=100, blank=True)
     information = models.TextField(blank=True)
     url_info = models.TextField(blank=True)

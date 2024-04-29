@@ -17,6 +17,7 @@ from .serializers import (
     GenerateConnectionSerializer,
     GuiaSerializers,
     ErrorGuiaSerializers,
+    UpdateRunningGuiaSerializers,
     GuiaCompletitionSerializers,
     VersionSerializer,
     InfoProjectSerializer,
@@ -545,13 +546,13 @@ class GenerateAssetInformationView(generics.CreateAPIView):
             if isFinal:
                 project.is_Loading = False
                 project.status = 'completed'
+                project.guide_running = False
                 project.save(update_fields=['is_Loading'])
                 asset_father.is_Loading = False
                 asset_father.save(update_fields=['is_Loading'])
 
             return Response({'status': 'success'})
         return Response(serializer.errors)
-
 
 """  
 Eliminar asset tras falla en generación
@@ -602,6 +603,31 @@ class DeleteGuiAssetView(generics.CreateAPIView):
 
             # Actualizar estado del activo padre
             asset_father.delete()
+            return Response({'status': 'success'})
+        return Response(serializer.errors)
+
+"""  
+Actualizar status de proyecto guide running
+"""
+class GuideRunningView(generics.CreateAPIView):
+    serializer_class = UpdateRunningGuiaSerializers
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = ErrorGuiaSerializers(data=request.data)
+        if serializer.is_valid():
+            project_id = serializer.validated_data['project_id']
+            guide_running = serializer.validated_data['guide_running']
+
+            user = get_object_or_404(User, id=self.request.user.id)
+            project = get_object_or_404(Project, id=project_id)
+            if not project in user.projects.all():
+                raise PermissionDenied("Project not found")
+            
+            project.guide_running = guide_running
+            project.save(update_fields=['guide_running'])
+
             return Response({'status': 'success'})
         return Response(serializer.errors)
 

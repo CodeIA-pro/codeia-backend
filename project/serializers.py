@@ -25,7 +25,7 @@ class InfoProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'information','serializer_info', 'url_info', 'view_info', 'lang']
+        fields = ['id', 'information','serializer_info', 'url_info', 'view_info', 'lang', 'guide_running']
         read_only_fields = ['id']
 
 
@@ -70,6 +70,10 @@ class GuiaCompletitionSerializers(serializers.Serializer):
 class ErrorGuiaSerializers(serializers.Serializer):
     project_id = serializers.IntegerField()
     asset_parent = serializers.IntegerField()
+
+class UpdateRunningGuiaSerializers(serializers.Serializer):
+    project_id = serializers.IntegerField()
+    guide_running = serializers.BooleanField()
 
 # Generate Connection Serializer
 
