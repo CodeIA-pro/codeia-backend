@@ -449,6 +449,7 @@ class GenerateAssetSubsectionView(generics.CreateAPIView):
             project.latest_build = datetime.now()
             project.last_short_sha = sha
             project.lang = language
+            project.message_failed = ''
             project.save()
 
             # update root asset
