@@ -521,8 +521,12 @@ class GenerateAssetInformationView(generics.CreateAPIView):
             isFinal = serializer.validated_data['isFinal']
 
             project = get_object_or_404(Project, id=project_id)
-            asset_father = get_object_or_404(Asset, id=asset_parent)
-            asset_child = get_object_or_404(Asset, id=asset_id)
+            user = get_object_or_404(User, id=self.request.user.id)
+            if not project in user.projects.all():
+                raise PermissionDenied("Project not found")
+            
+            asset_father = get_object_or_404(Asset, id=asset_parent, project_id=project_id)
+            asset_child = get_object_or_404(Asset, id=asset_id, project_id=project_id)
 
             if not success:
                 project.is_Loading = False
@@ -710,8 +714,7 @@ class RetrieveInformationGitHubRepoView(generics.RetrieveAPIView):
                     project.view_info = view_info.strip()
                     project.is_Loading = False
                     project.save()
-                    return Response({'status': 'Tests are being done :)'})
-                    #return Response({'status': 'success'})
+                    return Response({'status': 'success'})
 
             else:
                 project.is_Loading = False
