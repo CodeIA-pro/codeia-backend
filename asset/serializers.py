@@ -5,8 +5,8 @@ class ListAssetSerializer(serializers.ModelSerializer):
     subsection = serializers.SerializerMethodField()
     class Meta:
         model = Asset
-        fields = ['id', 'version', 'titulo', 'description', 'more_description', 'depth', 'url', 
-                  'is_father', 'father_id', 'subsection']
+        fields = ['id', 'version', 'titulo', 'description', 'more_description', 'depth', 
+                  'is_father', 'father_id', 'subsection', 'privacy',]
         read_only_fields = ['id', 'created_at']
         
     def get_subsection(self, obj):

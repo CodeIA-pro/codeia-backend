@@ -49,6 +49,19 @@ class ListAssetByVersionView(generics.ListAPIView):
         if not project in user.projects.all():
             raise PermissionDenied({'status': 'Not found'})
         return Asset.objects.filter(version=version, project_id=project.id, depth=0).order_by('id')
+    
+""" 
+Listar Asset por version y projecto
+"""
+class ListAssetByVersionURLView(generics.ListAPIView):
+    serializer_class = ListAssetSerializer
+    authentication_classes = [JWTAuthentication]  # Autenticacion
+    permission_classes = [permissions.IsAuthenticated]  # Permisos
+    queryset = Asset.objects.all()
+
+    def get_queryset(self):
+        version = self.kwargs['url_version']
+        return Asset.objects.filter(url=version, depth=0).order_by('id')
 
 """  
 Crear asset
