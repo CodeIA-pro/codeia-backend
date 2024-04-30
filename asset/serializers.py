@@ -28,5 +28,11 @@ class ChangeAssetSerializer(serializers.ModelSerializer):
                             'is_father', 'father_id', 'subsection']
 
 # Error Serializer
+class PrivacyAssetSerializer(serializers.Serializer):
+    project_id = serializers.IntegerField()
+    asset_id = serializers.IntegerField()
+    privacy = serializers.CharField()
+
+# Error Serializer
 class ErrorSerializer(serializers.Serializer):
     error = serializers.CharField()

@@ -1,4 +1,5 @@
 from app import settings
+import uuid
 from rest_framework.response import Response
 from rest_framework import generics, permissions,status
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -12,6 +13,7 @@ from .serializers import (
     AssetSerializer,
     ListAssetSerializer,
     ChangeAssetSerializer,
+    PrivacyAssetSerializer,
     ErrorSerializer,
 )
 
@@ -80,7 +82,44 @@ class CreateAssetView(generics.CreateAPIView):
         project.last_version = new_asset.version
         project.save(update_fields=['last_version'])
         return Response({'message': 'Product created successfully'}, status=status.HTTP_201_CREATED)
-        
+
+
+"""
+Cambiar prioridad de asset
+"""
+class PrivacyAssetStatusView(generics.CreateAPIView):
+    serializer_class = PrivacyAssetSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = PrivacyAssetSerializer(data=request.data)
+        if serializer.is_valid():
+            project_id = serializer.validated_data['project_id']
+            asset_parent = serializer.validated_data['asset_id']
+            privacy = serializer.validated_data['privacy']
+            # Validar que el proyecto exista
+            project = get_object_or_404(Project, id=project_id)
+            user = get_object_or_404(User, id=self.request.user.id)
+            if not project in user.projects.all():
+                raise PermissionDenied("Project not found")
+            
+            asset_father = get_object_or_404(Asset, id=asset_parent, project_id=project_id)
+            # generar uuid
+            link = uuid.uuid4()
+            asset_father.privacy = privacy
+            if privacy == 'public':
+                asset_father.url = link
+            else:
+                asset_father.url = ''
+            asset_father.url = link
+            asset_father.save()
+
+            return Response({
+                'status': 'success',
+                'link': link ,
+                'privacy': privacy })
+        return Response(serializer.errors)
 """
 Crear subsección
 """

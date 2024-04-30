@@ -6,7 +6,7 @@ class ProjectAssetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Asset
         fields = ['id', 'version', 'titulo', 'description', 'more_description', 'depth', 'url', 
-                  'is_father', 'father_id', 'subsection', 'is_Loading', 'to_failed', 'message_failed', 'url_commit', 'short_sha']
+                  'is_father', 'father_id', 'subsection', 'is_Loading', 'to_failed', 'message_failed', 'url_commit', 'short_sha', 'privacy']
         read_only_fields = ['id', 'created_at']
 
     def get_subsection(self, obj):
