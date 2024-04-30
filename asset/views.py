@@ -51,12 +51,11 @@ class ListAssetByVersionView(generics.ListAPIView):
         return Asset.objects.filter(version=version, project_id=project.id, depth=0).order_by('id')
     
 """ 
-Listar Asset por version y projecto
+Listar Asset por version y projecto y url
 """
 class ListAssetByVersionURLView(generics.ListAPIView):
     serializer_class = ListAssetSerializer
-    authentication_classes = [JWTAuthentication]  # Autenticacion
-    permission_classes = [permissions.IsAuthenticated]  # Permisos
+    permission_classes = [permissions.AllowAny]
     queryset = Asset.objects.all()
 
     def get_queryset(self):
