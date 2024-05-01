@@ -227,8 +227,12 @@ class GenerateConnectionGitHubView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]  # Permisos
 
     def extract_owner_repo(self, code):
-        CLIENT_ID = '60cff6eabecd0033117d'
-        CLIENT_SECRET = '77fb4e49418657684bc45f66f912433812254f58'
+        #CLIENT_ID = '60cff6eabecd0033117d'
+        #CLIENT_SECRET = '77fb4e49418657684bc45f66f912433812254f58'
+
+        CLIENT_ID = 'Iv1.3675fa2f711a037e'
+        CLIENT_SECRET = '8d3dcf8e7ea5c2722b9123dcb9f29a839a147d92'
+        
         params = "?client_id=" + CLIENT_ID + "&client_secret=" + CLIENT_SECRET + "&code=" + code
         url = "https://github.com/login/oauth/access_token" + params
         response = requests.post(url)
