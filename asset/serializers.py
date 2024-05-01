@@ -33,6 +33,11 @@ class PrivacyAssetSerializer(serializers.Serializer):
     asset_id = serializers.IntegerField()
     privacy = serializers.CharField()
 
+class PrivacyAssetInfoSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    privacy = serializers.CharField()
+
+
 # Error Serializer
 class ErrorSerializer(serializers.Serializer):
     error = serializers.CharField()

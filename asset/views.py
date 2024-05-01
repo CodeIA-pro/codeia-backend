@@ -14,6 +14,7 @@ from .serializers import (
     ListAssetSerializer,
     ChangeAssetSerializer,
     PrivacyAssetSerializer,
+    PrivacyAssetInfoSerializer,
     ErrorSerializer,
 )
 
@@ -134,6 +135,27 @@ class PrivacyAssetStatusView(generics.CreateAPIView):
                 'privacy': privacy 
                 })
         return Response(serializer.errors)
+    
+"""
+Consular privacidad de asset
+"""
+class PrivacyAssetStatusInfoView(generics.RetrieveAPIView):
+    serializer_class = PrivacyAssetInfoSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, project_id, asset_id):
+        # Validar que el proyecto exista
+        project = get_object_or_404(Project, id=project_id)
+        user = get_object_or_404(User, id=self.request.user.id)
+        if not project in user.projects.all():
+            raise PermissionDenied("Project not found")
+        asset_father = get_object_or_404(Asset, id=asset_id, project_id=project_id)
+        
+        return Response({
+            'status': 'success',
+            'privacy': asset_father.privacy 
+        })
 
 """
 Crear subsección
