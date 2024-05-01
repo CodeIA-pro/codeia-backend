@@ -130,8 +130,8 @@ class PrivacyAssetStatusView(generics.CreateAPIView):
             return Response({
                 'status': 'success',
                 'link': link ,
-                'owner': project.user_repo,
-                'repo': asset_father.titulo,
+                'project_id': project.id,
+                'asset_id': asset_father.id,
                 'privacy': privacy 
                 })
         return Response(serializer.errors)
