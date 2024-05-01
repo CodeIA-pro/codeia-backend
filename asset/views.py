@@ -95,9 +95,8 @@ class CreateAssetView(generics.CreateAPIView):
         project.save(update_fields=['last_version'])
         return Response({'message': 'Product created successfully'}, status=status.HTTP_201_CREATED)
 
-
 """
-Cambiar prioridad de asset
+Cambiar privacidad de asset
 """
 class PrivacyAssetStatusView(generics.CreateAPIView):
     serializer_class = PrivacyAssetSerializer
@@ -130,8 +129,12 @@ class PrivacyAssetStatusView(generics.CreateAPIView):
             return Response({
                 'status': 'success',
                 'link': link ,
-                'privacy': privacy })
+                'owner': project.user_repo,
+                'repo': asset_father.title,
+                'privacy': privacy 
+                })
         return Response(serializer.errors)
+
 """
 Crear subsección
 """
@@ -157,7 +160,6 @@ class CreatesSubSectionView(generics.CreateAPIView):
 """
 Update asset
 """
-
 class UpdateAssetView(generics.UpdateAPIView):
     serializer_class = AssetSerializer
     permission_classes = [permissions.AllowAny]
@@ -173,7 +175,6 @@ class UpdateAssetView(generics.UpdateAPIView):
 """
 Delete asset
 """
-
 class DeleteAssetView(generics.DestroyAPIView):
     serializer_class = ChangeAssetSerializer
     permission_classes = [permissions.AllowAny]
