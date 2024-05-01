@@ -154,7 +154,8 @@ class PrivacyAssetStatusInfoView(generics.RetrieveAPIView):
         
         return Response({
             'status': 'success',
-            'privacy': asset_father.privacy 
+            'privacy': asset_father.privacy,
+            'link': asset_father.url,
         })
 
 """
