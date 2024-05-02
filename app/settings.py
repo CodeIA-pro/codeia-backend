@@ -119,14 +119,14 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'old_default': {
         'ENGINE': 'djongo',
         'NAME': 'codeia',  # Nombre de tu base de datos en MongoDB
         'CLIENT': {
            'host': 'mongodb://localhost:27017',  # Cambia 'localhost' por la IP de tu servidor de MongoDB
         }
     },
-    'old_default': {
+    'default': {
         'ENGINE': 'djongo',
         'NAME': 'codeia',  # Nombre de tu base de datos en MongoDB
         'CLIENT': {
