@@ -19,6 +19,7 @@ from .serializers import (
     RegisterSerializer,
     UserSerializerAdmin,
     CheckSerializer,
+    UserStatusSerializer,
     UserSerializerAdminUpdate,
 )
 
@@ -76,6 +77,15 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         """Retrieve and return the authenticated user."""
         return self.request.user
+    
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_object()
+        email = request.data['email']
+        if email != serializer.email:
+            user = User.objects.filter(email=email)
+            if len(user) > 0:
+                return Response({'message': 'User already exists', 'status': True})
+        return Response(serializer.data)
     
 class CheckCodeView(generics.UpdateAPIView):
     """Manage the authenticated user."""

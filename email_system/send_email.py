@@ -13,7 +13,7 @@ def email_verify(to, name, code):
 
 def email_forgotten_password(to, name, code):
     subject = "CodeIA - Forgot your password?"
-    link = "http://localhost:5173/auth/password/reset/" + code
+    link = "https://codeia-web.vercel.app/auth/password/reset/" + code
     context = {'link': link,}
     html_content = render_to_string('email_forgotten_password.html', context)
     send_email(to, name, subject, html_content)
