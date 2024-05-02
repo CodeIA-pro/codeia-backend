@@ -248,8 +248,7 @@ class GenerateConnectionGitHubView(generics.RetrieveAPIView):
                 user.token_repo = access_token
                 user.repo_login = True
                 user.user_github = response.json()['login']
-                user.save(update_fields=['token_repo', 'repo_login'])
-                print(response.text)
+                user.save()
                 return "success"
             else:
                 raise PermissionDenied("Error in GitHub API")
