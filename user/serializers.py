@@ -61,7 +61,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ["id", "email", "name", "surname", "date_of_birth", "role", "created_at", "password"]
+        fields = ["id", "email", "name", "surname", "password", "two_factor", "repo_login"]
         read_only_fields = ["id", "created_at", "role",]
 
     def __init__(self, *args, **kwargs):
