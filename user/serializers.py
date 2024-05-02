@@ -63,7 +63,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ["id", "email", "name", "surname", "password", "two_factor", "repo_login", "full_name"]
+        fields = ["id", "email", "name", "surname", "password", "two_factor", "repo_login", "full_name", "user_github"]
         read_only_fields = ["id", "created_at", "role",]
 
     def get_full_name(self, obj):

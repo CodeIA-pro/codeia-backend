@@ -87,3 +87,7 @@ class VersionSerializer(serializers.Serializer):
 # Error Serializer
 class ErrorSerializer(serializers.Serializer):
     error = serializers.CharField()
+
+# Error Serializer
+class ProjectGenericSerializer(serializers.Serializer):
+    pass  

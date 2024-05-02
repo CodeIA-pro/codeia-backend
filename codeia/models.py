@@ -99,6 +99,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_of_birth = models.DateField(null=True)
     token_repo = models.TextField(blank=True)
     repo_login = models.BooleanField(default=False)
+    user_github = models.CharField(max_length=100, blank=True)
     projects = models.ArrayReferenceField(to=Project, default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     verification_code = models.IntegerField(default=0, blank=True)

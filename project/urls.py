@@ -24,4 +24,5 @@ urlpatterns = [
     path('read-repo/<int:pk>/', views.RetrieveInformationGitHubRepoView.as_view(), name='read repo'),
     path('restore/', views.DeleteGuiAssetView.as_view(), name='restore project'),
     path('running-guide/', views.GuideRunningView.as_view(), name='running guide'),
+    path('unlink-repo/', views.UnlinkGithubView.as_view(), name='unlink repo'),
 ]

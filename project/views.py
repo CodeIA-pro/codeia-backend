@@ -21,6 +21,7 @@ from .serializers import (
     GuiaCompletitionSerializers,
     VersionSerializer,
     InfoProjectSerializer,
+    ProjectGenericSerializer,
     ErrorSerializer,
 )
 from datetime import datetime
@@ -246,6 +247,7 @@ class GenerateConnectionGitHubView(generics.RetrieveAPIView):
                 user = get_object_or_404(User, id=self.request.user.id)
                 user.token_repo = access_token
                 user.repo_login = True
+                user.user_github = response.json()['login']
                 user.save(update_fields=['token_repo', 'repo_login'])
                 print(response.text)
                 return "success"
@@ -260,7 +262,23 @@ class GenerateConnectionGitHubView(generics.RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         # Aquí se invoca get_object y se maneja la respuesta.
         return self.get_object()    
-    
+
+"""
+Desvincular cuenta de github
+"""
+class UnlinkGithubView(generics.CreateAPIView):
+    serializer_class = ProjectGenericSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = get_object_or_404(User, id=self.request.user.id)
+        user.token_repo = ''
+        user.repo_login = False
+        user.user_github = ''
+        user.save()
+        return Response({'status': 'success'})
+
 """
 Estado de la conexión con github
 """
