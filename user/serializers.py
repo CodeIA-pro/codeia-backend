@@ -57,12 +57,16 @@ class CheckSerializer(serializers.Serializer):
     code = serializers.IntegerField()
 
 class UserSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
     password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = get_user_model()
-        fields = ["id", "email", "name", "surname", "password", "two_factor", "repo_login"]
+        fields = ["id", "email", "name", "surname", "password", "two_factor", "repo_login", "full_name"]
         read_only_fields = ["id", "created_at", "role",]
+
+    def get_full_name(self, obj):
+        return f"{obj.name} {obj.surname}"
 
     def __init__(self, *args, **kwargs):
         super(UserSerializer, self).__init__(*args, **kwargs)
