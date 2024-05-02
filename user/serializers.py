@@ -2,6 +2,7 @@ from django.contrib.auth import (
     get_user_model,
 )
 from rest_framework import serializers
+from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
@@ -75,10 +76,10 @@ class UserSerializer(serializers.ModelSerializer):
         if self.context.get('request') and self.context['request'].method != 'PATCH':
             self.fields.pop('password', None)
 
-
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)
         user = super().update(instance, validated_data)
+
         if password:
             user.set_password(password)
             user.save()

@@ -79,12 +79,21 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
         return self.request.user
     
     def update(self, request, *args, **kwargs):
-        serializer = self.get_object()
-        email = request.data['email']
-        if email != serializer.email:
+        instance = self.get_object()
+
+        if 'email' in request.data:
+            email = request.data['email']
             user = User.objects.filter(email=email)
             if len(user) > 0:
                 return Response({'message': 'User already exists', 'status': True})
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
         return Response(serializer.data)
     
 class CheckCodeView(generics.UpdateAPIView):
