@@ -20,6 +20,7 @@ from .serializers import (
     UserSerializerAdmin,
     CheckSerializer,
     UserPassSerializer,
+    UserChangeSerializer,
     UserSerializerAdminUpdate,
 )
 
@@ -122,6 +123,30 @@ class TwoFactorView(generics.CreateAPIView):
         user.two_factor = not user.two_factor
         user.save()
         return Response({'status': 'success'})
+"""  
+Actualizar contraseña
+"""
+class ChangePasswordView(generics.CreateAPIView):
+    serializer_class = UserChangeSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = UserChangeSerializer(data=request.data)
+        if serializer.is_valid():
+            password = serializer.validated_data['password']
+            new_password = serializer.validated_data['new_password']
+            user = get_object_or_404(User, id=self.request.user.id)
+            if user.check_password(password):
+                user.set_password(new_password)
+                user.save()
+                return Response({'message': 'Password changed successfully', 'status': True})
+            else:
+                return Response({'message': 'Password incorrect', 'status': False})
+
+            
+            return Response({'status': 'success'})
+        return Response(serializer.errors)
 
 """
 Admin view

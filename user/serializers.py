@@ -100,3 +100,7 @@ class UserSerializerAdminUpdate(serializers.ModelSerializer):
 
 class UserPassSerializer(serializers.Serializer):
     pass
+
+class UserChangeSerializer(serializers.Serializer):
+    password = serializers.CharField()
+    new_password = serializers.CharField()
