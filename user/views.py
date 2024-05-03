@@ -144,8 +144,6 @@ class ChangePasswordView(generics.CreateAPIView):
             else:
                 return Response({'message': 'Password incorrect', 'status': False})
 
-            
-            return Response({'status': 'success'})
         return Response(serializer.errors)
 
 """
