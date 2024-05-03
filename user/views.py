@@ -120,6 +120,7 @@ class TwoFactorView(generics.CreateAPIView):
     def post(self, request):
         user = get_object_or_404(User, id=self.request.user.id)
         user.two_factor = not user.two_factor
+        user.save()
         return Response({'status': 'success'})
 
 """
