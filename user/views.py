@@ -19,7 +19,7 @@ from .serializers import (
     RegisterSerializer,
     UserSerializerAdmin,
     CheckSerializer,
-    UserStatusSerializer,
+    UserPassSerializer,
     UserSerializerAdminUpdate,
 )
 
@@ -112,6 +112,15 @@ class CheckCodeView(generics.UpdateAPIView):
         user.save()
         return Response({'status': True})
 
+class TwoFactorView(generics.CreateAPIView):
+    serializer_class = UserPassSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = get_object_or_404(User, id=self.request.user.id)
+        user.two_factor = not user.two_factor
+        return Response({'status': 'success'})
 
 """
 Admin view

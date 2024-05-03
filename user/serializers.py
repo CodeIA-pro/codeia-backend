@@ -98,5 +98,5 @@ class UserSerializerAdminUpdate(serializers.ModelSerializer):
         fields = ["id", "email", "name", "surname", "date_of_birth", "role", "created_at",]
         read_only_fields = ["id", "created_at","email"]
 
-class UserStatusSerializer(serializers.Serializer):
-    status = serializers.CharField()
+class UserPassSerializer(serializers.Serializer):
+    pass
