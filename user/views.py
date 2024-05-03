@@ -21,6 +21,7 @@ from .serializers import (
     CheckSerializer,
     UserPassSerializer,
     UserChangeSerializer,
+    TokenObtainPairSerializer,
     UserSerializerAdminUpdate,
 )
 
@@ -31,6 +32,10 @@ class CustomPagination(PageNumberPagination):
 
 class LoginView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+    permission_classes = [permissions.AllowAny]
+
+class AdminLoginView(TokenObtainPairView):
+    serializer_class = TokenObtainPairSerializer
     permission_classes = [permissions.AllowAny]
 
 class LoginTwoFAView(TokenObtainPairView):

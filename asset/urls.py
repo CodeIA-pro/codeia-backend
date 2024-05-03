@@ -14,4 +14,5 @@ urlpatterns = [
     path('privacy/', views.PrivacyAssetStatusView.as_view(), name='update privacy asset'),
     path('privacy/project/<int:project_id>/asset/<int:asset_id>/', views.PrivacyAssetStatusInfoView.as_view(), name='get privacy asset'),
     path('delete/<int:pk>/', views.DeleteAssetView.as_view(), name='delete asset'),
+    path('star/', views.StarAssetView.as_view(), name='star asset'),
 ]

@@ -5,7 +5,7 @@ from rest_framework import generics, permissions,status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404 
-from codeia.models import Asset, Project, User
+from codeia.models import Asset, Project, Star, User
 from django.forms.models import model_to_dict
 from rest_framework.pagination import PageNumberPagination
 from codeia.permissions import IsAuthenticatedUser
@@ -15,6 +15,7 @@ from .serializers import (
     ChangeAssetSerializer,
     PrivacyAssetSerializer,
     PrivacyAssetInfoSerializer,
+    StarSerializer,
     ErrorSerializer,
 )
 
@@ -179,6 +180,25 @@ class CreatesSubSectionView(generics.CreateAPIView):
         asset.save(update_fields=['is_father'])
 
         return Response({'message': 'Product subsection added successfully'}, status=status.HTTP_201_CREATED)
+
+"""  
+Agregar estrellas
+"""
+class StarAssetView(generics.CreateAPIView):
+    serializer_class = StarSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = StarSerializer(data=request.data)
+        if serializer.is_valid():
+            star_value = serializer.validated_data['star']
+            asset_id = serializer.validated_data['asset_id']
+            asset = get_object_or_404(Asset, id=asset_id, depth=0)
+            star_obj = Star(value=star_value)
+            asset.stars.append(model_to_dict(star_obj))
+            asset.save()
+            return Response({'status': 'success'})
+        return Response(serializer.errors)
 
 """
 Update asset

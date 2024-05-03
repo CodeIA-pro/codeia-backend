@@ -3,15 +3,25 @@ from codeia.models import Asset
     
 class ListAssetSerializer(serializers.ModelSerializer):
     subsection = serializers.SerializerMethodField()
+    star_average = serializers.SerializerMethodField()
+    start_quantity = serializers.SerializerMethodField()
     class Meta:
         model = Asset
         fields = ['id', 'version', 'titulo', 'description', 'more_description', 'depth', 
-                  'is_father', 'father_id', 'subsection', 'privacy',]
+                  'is_father', 'father_id', 'subsection', 'privacy', 'star_average', 'start_quantity']
         read_only_fields = ['id', 'created_at']
         
     def get_subsection(self, obj):
         subsection_asset = obj.subsection.all().order_by('id')
         return ListAssetSerializer(subsection_asset, many=True).data
+    
+    def get_star_average(self, obj):
+        if len(obj.stars) == 0:
+            return 0
+        return round(sum([star['value'] for star in obj.stars]) / len(obj.stars))
+    
+    def get_start_quantity(self, obj):
+        return len(obj.stars)
 
 class AssetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,6 +47,9 @@ class PrivacyAssetInfoSerializer(serializers.Serializer):
     status = serializers.CharField()
     privacy = serializers.CharField()
 
+class StarSerializer(serializers.Serializer):
+    star = serializers.IntegerField()
+    asset_id = serializers.IntegerField()
 
 # Error Serializer
 class ErrorSerializer(serializers.Serializer):

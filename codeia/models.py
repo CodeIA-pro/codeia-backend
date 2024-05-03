@@ -25,6 +25,11 @@ class TypeComment(models.Model):
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+class Star(models.Model):
+    value = models.IntegerField(primary_key=True, blank=False)
+    class Meta:
+        managed = False
+
 class Comment(models.Model):
     user = models.IntegerField(blank=False)
     title = models.CharField(max_length=100)
@@ -61,6 +66,8 @@ class Asset(models.Model):
     father_id = models.IntegerField(blank=False)
     project_id = models.IntegerField(blank=True)
     subsection = models.ArrayReferenceField(to='self', default=list, blank=True)
+    stars = models.ArrayField(model_container=Star, null=True, default=list)
+
 
 class Project(models.Model):
     title = models.CharField(max_length=100, blank=True)

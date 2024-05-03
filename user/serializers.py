@@ -29,6 +29,18 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["repo_login"] = userprofile.repo_login
         return data
     
+class TokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        token = self.get_token(self.user)
+        data["user"] = str(self.user)
+        data["id"] = self.user.id
+        userprofile = get_object_or_404(User, email=self.user)
+        data["role"] = userprofile.role
+        data["name"] = userprofile.name + " " + userprofile.surname
+        data["repo_login"] = userprofile.repo_login
+        return data    
+    
 class MyTokenTwoFASerializer(serializers.Serializer):
     code = serializers.IntegerField()
 
