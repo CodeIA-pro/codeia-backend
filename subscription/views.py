@@ -11,7 +11,8 @@ from codeia.permissions import IsAdminUser
 from .serializers import (
     SubscriptionAdminSerializers,
     GenerateSubscriptionSerializer,
-    SubscribeSerializer
+    SubscribeSerializer,
+    CancelSerializer
 )
 
 class ListSubscriptionView(generics.ListAPIView):
@@ -109,6 +110,25 @@ class SubscribeView(generics.CreateAPIView):
 
             return Response({'status': 'success'})
         return Response(serializer.errors)
+
+class CancelSubscriptionView(generics.CreateAPIView):
+    serializer_class = CancelSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = CancelSerializer(data=request.data)
+        if serializer.is_valid():
+            subscription = Subscription.objects.filter(user_id=self.request.user.id, status='active')
+            if len(subscription) == 0:
+                return Response({'status': 'error', 'message': 'No active subscription found'})
+            
+            subscription = subscription[0]
+            subscription.status = 'inactive'
+            subscription.save()
+            return Response({'status': 'success'})
+        return Response(serializer.errors)
+
 
 class UpdateSubscriptionView(generics.UpdateAPIView):
     serializer_class = SubscriptionAdminSerializers

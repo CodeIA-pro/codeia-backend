@@ -13,3 +13,6 @@ class GenerateSubscriptionSerializer(serializers.Serializer):
 
 class SubscribeSerializer(serializers.Serializer):
     code = serializers.CharField()
+
+class CancelSerializer(serializers.Serializer):
+    pass
