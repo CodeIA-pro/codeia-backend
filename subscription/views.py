@@ -129,7 +129,6 @@ class CancelSubscriptionView(generics.CreateAPIView):
             return Response({'status': 'success'})
         return Response(serializer.errors)
 
-
 class UpdateSubscriptionView(generics.UpdateAPIView):
     serializer_class = SubscriptionAdminSerializers
     authentication_classes = [JWTAuthentication]  # Autenticacion
