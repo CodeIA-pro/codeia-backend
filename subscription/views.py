@@ -12,6 +12,7 @@ from .serializers import (
     SubscriptionAdminSerializers,
     GenerateSubscriptionSerializer,
     SubscribeSerializer,
+    SubscriptionSerializers,
     CancelSerializer
 )
 
@@ -31,7 +32,7 @@ class GetSubscriptionView(generics.RetrieveAPIView):
         return self.queryset.filter(id=self.kwargs['pk'])
     
 class GetSubscriptionUserView(generics.RetrieveAPIView):
-    serializer_class = SubscriptionAdminSerializers
+    serializer_class = SubscriptionSerializers
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
@@ -41,7 +42,7 @@ class GetSubscriptionUserView(generics.RetrieveAPIView):
             return Response({'status': False, 'message': 'No subscription found'})
         
         user_subscriptions = user_subscriptions[0]
-        return Response(SubscriptionAdminSerializers(user_subscriptions).data)
+        return Response(SubscriptionSerializers(user_subscriptions).data)
 
 class GenerateSubscriptionView(generics.CreateAPIView):
     serializer_class = GenerateSubscriptionSerializer
