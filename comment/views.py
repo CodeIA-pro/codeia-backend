@@ -1,7 +1,8 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from codeia.models import Comment, TypeComment
 from rest_framework import generics
-from codeia.permissions import IsAuthenticatedUser
+from codeia.permissions import IsAuthenticatedUser, IsAdminUser
+from rest_framework import permissions
 from django.shortcuts import get_object_or_404 
 from .serializers import (
     CommentSerializers,
@@ -11,7 +12,7 @@ from .serializers import (
 class ListCommentView(generics.ListAPIView):
     serializer_class = ListCommentSerializers
     authentication_classes = [JWTAuthentication]  # Autenticacion
-    permission_classes = [IsAuthenticatedUser]  # Permisos
+    permission_classes = [IsAdminUser]  # Permisos
     
     def get_queryset(self):
         type_id = self.kwargs['type_id']
@@ -28,8 +29,7 @@ class GetCommentbyUserView(generics.ListAPIView):
     
 class CreateCommentView(generics.CreateAPIView):
     serializer_class = CommentSerializers
-    authentication_classes = [JWTAuthentication]  # Autenticacion
-    permission_classes = [IsAuthenticatedUser]  # Permisos
+    permission_classes = [permissions.AllowAny]
     
     def perform_create(self, serializer):
         type_id = self.kwargs['type_id']
@@ -43,7 +43,7 @@ class CreateCommentView(generics.CreateAPIView):
 class UpdateCommentView(generics.UpdateAPIView):
     serializer_class = CommentSerializers
     authentication_classes = [JWTAuthentication]  # Autenticacion
-    permission_classes = [IsAuthenticatedUser]  # Permisos
+    permission_classes = [IsAdminUser]  # Permisos
     queryset = Comment.objects.all()
 
     def get_object(self):
@@ -52,7 +52,7 @@ class UpdateCommentView(generics.UpdateAPIView):
 class DeleteCommentView(generics.DestroyAPIView):
     serializer_class = CommentSerializers
     authentication_classes = [JWTAuthentication]  # Autenticacion
-    permission_classes = [IsAuthenticatedUser]  # Permisos
+    permission_classes = [IsAdminUser]  # Permisos
     queryset = Comment.objects.all()
 
     def get_object(self):
