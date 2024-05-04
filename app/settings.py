@@ -71,6 +71,8 @@ PROJECT_APPS = [
     "comment",
     "repository",
     "forgotten",
+    "plan",
+    "subscription"
 ]
 
 THIRD_PARTY_APPS = [

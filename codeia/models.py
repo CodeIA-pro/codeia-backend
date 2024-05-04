@@ -37,6 +37,21 @@ class Comment(models.Model):
     type_comment = models.IntegerField(blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+class Plan(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class Subscription(models.Model):
+    id_plan = models.IntegerField(blank=False)
+    user_id = models.IntegerField(blank=False)
+    months_duration = models.IntegerField(blank=False)
+    activation_code = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=100, blank=True)
+    is_activated = models.BooleanField(default=False, blank=True)
+    due_date = models.DateTimeField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
 class FAQ(models.Model):
     question = models.CharField(max_length=100, blank=True)
     answer = models.TextField(blank=True)
@@ -113,6 +128,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     two_factor = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    plan = models.IntegerField(default=0)
     role = models.CharField(max_length=20, default='guest')
     objects = UserManager()
 

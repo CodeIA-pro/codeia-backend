@@ -26,4 +26,6 @@ urlpatterns = [
     path("comment/", include("comment.urls"), name="comment"),
     path("repository/", include("repository.urls"), name="repository"),
     path("forgotten/", include("forgotten.urls"), name="forgotten"),
+    path("plan/", include("plan.urls"), name="plan"),
+    path("subscription/", include("subscription.urls"), name="subscription"),
 ]

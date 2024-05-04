@@ -69,6 +69,7 @@ class CreateUserView(generics.CreateAPIView):
         user = self.perform_create(serializer)
         user.verification_code = code
         user.save()
+
         headers = self.get_success_headers(serializer.data)
         email_verify(serializer.data['email'], serializer.data['name'] + " " + serializer.data['surname'], code) 
         response_data = {'message': 'User created successfully'}
