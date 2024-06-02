@@ -8,7 +8,7 @@ class ListAssetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Asset
         fields = ['id', 'version', 'titulo', 'description', 'more_description', 'depth', 
-                  'is_father', 'father_id', 'subsection', 'privacy', 'star_average', 'start_quantity']
+                  'is_father', 'father_id', 'subsection', 'privacy', 'star_average', 'start_quantity', 'theme',]
         read_only_fields = ['id', 'created_at']
         
     def get_subsection(self, obj):
@@ -42,6 +42,10 @@ class PrivacyAssetSerializer(serializers.Serializer):
     project_id = serializers.IntegerField()
     asset_id = serializers.IntegerField()
     privacy = serializers.CharField()
+
+class DownloadAssetSerializer(serializers.Serializer):
+    project_id = serializers.IntegerField()
+    asset_id = serializers.IntegerField()
 
 class PrivacyAssetInfoSerializer(serializers.Serializer):
     status = serializers.CharField()

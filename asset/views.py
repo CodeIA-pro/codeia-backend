@@ -9,6 +9,7 @@ from codeia.models import Asset, Project, Star, User
 from django.forms.models import model_to_dict
 from rest_framework.pagination import PageNumberPagination
 from codeia.permissions import IsAuthenticatedUser
+from templates.download_guide.download import generate_pdf
 from .serializers import (
     AssetSerializer,
     ListAssetSerializer,
@@ -16,6 +17,7 @@ from .serializers import (
     PrivacyAssetSerializer,
     PrivacyAssetInfoSerializer,
     StarSerializer,
+    DownloadAssetSerializer,
     ErrorSerializer,
 )
 
@@ -136,7 +138,7 @@ class PrivacyAssetStatusView(generics.CreateAPIView):
                 'privacy': privacy 
                 })
         return Response(serializer.errors)
-    
+
 """
 Consular privacidad de asset
 """
@@ -158,6 +160,35 @@ class PrivacyAssetStatusInfoView(generics.RetrieveAPIView):
             'privacy': asset_father.privacy,
             'link': asset_father.url,
         })
+
+"""
+Descargar asset
+"""
+class DownloadAssetView(generics.CreateAPIView):
+    serializer_class = DownloadAssetSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = DownloadAssetSerializer(data=request.data)
+        if serializer.is_valid():
+            project_id = serializer.validated_data['project_id']
+            asset_parent = serializer.validated_data['asset_id']
+            # Validar que el proyecto exista
+            project = get_object_or_404(Project, id=project_id)
+            user = get_object_or_404(User, id=self.request.user.id)
+            asset_root = get_object_or_404(Asset, id=asset_parent, project_id=project_id)
+            if not project in user.projects.all():
+                raise PermissionDenied("Project not found")
+            asset_father = Asset.objects.filter(father_id=asset_parent, project_id=project_id)
+            asset_father_dicts = [model_to_dict(obj) for obj in asset_father]
+            text = ''
+            for asset in asset_father_dicts:
+                text += asset['description']
+
+            data = generate_pdf(html_content=text, version=asset_father_dicts[0]['version'], name=asset_root.titulo)
+            return data
+        return Response(serializer.errors)
 
 """
 Crear subsección
