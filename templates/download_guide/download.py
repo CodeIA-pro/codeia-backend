@@ -51,6 +51,15 @@ def parse_markdown(pdf, text):
         pdf.ln(5)
     return '\n'.join(parsed_text)
 
+def replace_special_characters(text):
+    replacements = {
+        '\u2019': "'",
+        # Añadir más reemplazos si es necesario
+    }
+    for original, replacement in replacements.items():
+        text = text.replace(original, replacement)
+    return text
+
 def generate_pdf(*, html_content, version, name):
     pdf = PDF('P', 'mm', 'A4')
     pdf.add_page()  # Agregar página antes de escribir contenido
@@ -58,7 +67,8 @@ def generate_pdf(*, html_content, version, name):
     pdf.compress = False
     pdf.set_font('Arial', '', 12)
     pdf.set_text_color(0, 0, 0)
-    text = parse_markdown(pdf, html_content)
+    cleaned_content = replace_special_characters(html_content)
+    text = parse_markdown(pdf, cleaned_content)
     pdf.multi_cell(190, 10, text, border=0)
     pdf_bytes = pdf.output(dest='S').encode('latin-1')
     return response_pdf(pdf_bytes, name, version)
