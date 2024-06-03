@@ -18,6 +18,7 @@ from .serializers import (
     PrivacyAssetInfoSerializer,
     StarSerializer,
     DownloadAssetSerializer,
+    MarkdownAssetSerializer,
     ErrorSerializer,
 )
 
@@ -137,6 +138,31 @@ class PrivacyAssetStatusView(generics.CreateAPIView):
                 'asset_id': asset_father.id,
                 'privacy': privacy 
                 })
+        return Response(serializer.errors)
+
+"""
+Actualizar asset descripcion
+"""
+class EditMarkdownAssetView(generics.CreateAPIView):
+    serializer_class = MarkdownAssetSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = MarkdownAssetSerializer(data=request.data)
+        if serializer.is_valid():
+            asset_parent = serializer.validated_data['asset_id']
+            description = serializer.validated_data['markdownText']
+            # Validar que el proyecto exista
+            asset_father = get_object_or_404(Asset, id=asset_parent)
+            project = get_object_or_404(Project, id=asset_father.project_id)
+            user = get_object_or_404(User, id=self.request.user.id)
+            if not project in user.projects.all():
+                raise PermissionDenied("Project not found")
+            asset_father.description = description
+            asset_father.save()
+
+            return Response({'status': 'success',})
         return Response(serializer.errors)
 
 """

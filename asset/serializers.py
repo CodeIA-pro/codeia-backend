@@ -43,6 +43,11 @@ class PrivacyAssetSerializer(serializers.Serializer):
     asset_id = serializers.IntegerField()
     privacy = serializers.CharField()
 
+class MarkdownAssetSerializer(serializers.Serializer):
+    asset_id = serializers.IntegerField()
+    markdownText = serializers.CharField()
+
+
 class DownloadAssetSerializer(serializers.Serializer):
     project_id = serializers.IntegerField()
     asset_id = serializers.IntegerField()
