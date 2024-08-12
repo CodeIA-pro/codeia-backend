@@ -153,7 +153,7 @@ class GenerateGuideView(generics.RetrieveAPIView):
         # Crear activos de nivel 1
         # Entrando a modelo
         for section in secciones:
-            guide_content = self.generate_text_with_gpt3(project, root_asset, repo_content, section, project.title)
+            guide_content = self.generate_text_with_gemini(project, root_asset, repo_content, section, project.title)
             self.create_subsection(root_asset, section, guide_content)
         project.last_version = next_version
         project.latest_build = datetime.now()
@@ -180,7 +180,7 @@ class GenerateGuideView(generics.RetrieveAPIView):
         asset.save()
 
     @staticmethod
-    def generate_text_with_gpt3(project, root_asset, repo_content, section_title, user):
+    def generate_text_with_gemini(project, root_asset, repo_content, section_title, user):
         api_key = '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'  # clave
         prompt = f"Genera directamente el contenido util para una sección titulada '{section_title}' basado en la siguiente información del proyecto Django Rest Framework:\n\n{repo_content}\n"
 
@@ -190,7 +190,7 @@ class GenerateGuideView(generics.RetrieveAPIView):
         }
 
         data = {
-            'model': 'gpt-4',
+            'model': 'gemini-1.5',
             'messages': [
                 {
                     'role': 'system',
