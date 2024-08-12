@@ -207,11 +207,11 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "CONTACT": {
         "name": "CodeIA",
-        "url": "https://codeia.com",
+        "url": "https://codeia-web.vercel.app",
     },
     "LICENSE": {
         "name": "MIT",
-        "url": "codeia@gmail.com",
+        "url": "https://opensource.org/licenses/MIT",
     },
     "SWAGGER_UI_SETTINGS": {
         "persistAuthorization": True,
