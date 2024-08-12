@@ -13,6 +13,12 @@ This project was initiated in response to three main issues:
 
 By automating the documentation process, this project aims to improve the understanding and maintenance of APIs, thereby facilitating better project management and developer onboarding.
 
+## Physical Architecture
+
+The physical architecture of the project is designed to ensure optimal performance, scalability, and security. Below is a diagram illustrating the physical components and their interactions:
+
+![System Architecture Diagram](https://firebasestorage.googleapis.com/v0/b/fir-dataapp-c6043.appspot.com/o/DIAGRAMA.png?alt=media&token=8a7ce721-f2e4-4f8e-95e3-6758ac3225d7)
+
 ## Project Structure
 
 The project is structured as follows:
