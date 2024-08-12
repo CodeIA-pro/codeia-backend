@@ -17,7 +17,7 @@ By automating the documentation process, this project aims to improve the unders
 
 The physical architecture of the project is designed to ensure optimal performance, scalability, and security. Below is a diagram illustrating the physical components and their interactions:
 
-![System Architecture Diagram](https://firebasestorage.googleapis.com/v0/b/fir-dataapp-c6043.appspot.com/o/DIAGRAMA.png?alt=media&token=8a7ce721-f2e4-4f8e-95e3-6758ac3225d7)
+![System Architecture Diagram](https://firebasestorage.googleapis.com/v0/b/fir-dataapp-c6043.appspot.com/o/DIAGRAMA2.png?alt=media&token=2b1d1fbc-7a0c-4429-8df4-0a77f9242572)
 
 ## Project Structure
 
